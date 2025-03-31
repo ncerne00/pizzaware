@@ -1,0 +1,7 @@
+/* specifying resources to embed in our Portable Executable (PE)*/
+
+// CHEF_IMAGE is our identifier that will be used to load the image from .rsrc section of the PE
+CHEF_IMAGE RCDATA "../../resources/italian_chef.jpg"
+
+/* Italian music to annoy our users with */
+ITALIAN_MP3 RCDATA "../../resources/italian-tarantella.mp3"
