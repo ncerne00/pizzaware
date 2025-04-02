@@ -5,3 +5,7 @@ CHEF_IMAGE RCDATA "../../resources/italian_chef.jpg"
 
 /* Italian music to annoy our users with */
 ITALIAN_MP3 RCDATA "../../resources/italian-tarantella.mp3"
+
+/* Pizza pics for popups to spam our user with */
+PIZZA1_IMAGE RCDATA "../../resources/pizza1.png"
+PIZZA2_IMAGE RCDATA "../../resources/pizza2.png"

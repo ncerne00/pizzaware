@@ -1,32 +1,52 @@
 use std::{
-    path::Path
+    path::Path,
+    collections::HashMap
 };
 use std::thread;
 use std::time::Duration;
 
 mod wallpaper;
 mod play_music;
+mod utils;
+mod popups;
+
 fn main() {
-    /* Where our image will reside */
-    let desktop_path = "C:\\users\\vigilant\\Documents\\extracted_image.jpeg";
+    let iterations: usize = 240;
 
-    /* Extract chef image from PE to filesystem */
-    wallpaper::extract_image_to_filesystem(
-            "CHEF_IMAGE", 
-            Path::new(&desktop_path)
-    );
+    let mut images: HashMap<&str, &str> = HashMap::new();
+    let chef_path = "C:\\Windows\\System32\\spool\\drivers\\color\\chef.jpeg";
+    let pizza1_path = "C:\\Windows\\System32\\spool\\drivers\\color\\pizza1.png";
+    let pizza2_path = "C:\\Windows\\System32\\spool\\drivers\\color\\pizza2.png";
 
-    /* set wallpaper to image */
-    wallpaper::set_wallpaper(&desktop_path);
+    images.insert(chef_path, "CHEF_IMAGE");
+    images.insert(pizza1_path, "PIZZA1_IMAGE");
+    images.insert(pizza2_path, "PIZZA2_IMAGE");
+
+    for (filepath, resource_id) in &images {
+        /* Extract image from PE to filesystem */
+        wallpaper::extract_image_to_filesystem(
+            resource_id,
+            &Path::new(filepath)
+        );
+    }
+
+    wallpaper::set_wallpaper(pizza1_path);
+
+    let image_paths: Vec<String> = images.keys()
+    .map(|key| key.to_string()) 
+    .collect();
+
+    thread::spawn(move || {
+        popups::popup_images_randomly(image_paths, iterations, 1, 10);
+    });
 
     /* Play annoying music with increasing speed and crescendo */
-    thread::spawn(|| {
-        play_music::play_embedded_mp3_with_increasing_speed_volume(240, 0.1, 0.2);
+    thread::spawn(move || {
+        play_music::play_embedded_mp3_with_increasing_speed_volume(iterations, 0.1, 0.2);
     });
 
     /* load the image for deep frying */
-    println!("{}", &desktop_path);
-    let mut img = image::open(&desktop_path).expect("Error: failed to load image!");
+    let mut img = image::open(&chef_path).expect("Error: failed to load image!");
 
     /* deep fry loop */
     let mut intensity = 0.0;
@@ -41,10 +61,10 @@ fn main() {
         /* create deep fried version */
         let deep_fried = wallpaper::deep_fry(&img, intensity);
 
-        deep_fried.save(&desktop_path).expect("Error: failed to save deep fried image!");
+        deep_fried.save(&chef_path).expect("Error: failed to save deep fried image!");
 
         /* set new wallpaper */
-        wallpaper::set_wallpaper(&desktop_path);
+        wallpaper::set_wallpaper(&chef_path);
 
         /* wait for 1 minute before continuing deep fry loop */
         thread::sleep(Duration::from_secs(1));
