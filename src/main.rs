@@ -47,6 +47,18 @@ fn main() {
     });
 
     thread::spawn(move || {
+        let messages = vec![
+            "Warning: Nick needs a pizza".to_string(),
+            "Nick is hungry".to_string(),
+            "Dominos > Papa Johns".to_string(),
+            "I know where you live".to_string(),
+            "No pizza = System shutdown imminent".to_string(),
+        ];
+
+        popups::popup_messages_randomly(messages, iterations, 3000, 10000);
+    });
+
+    thread::spawn(move || {
         popups::popup_images_randomly(image_paths, iterations, 3000, 10000);
     });
 
