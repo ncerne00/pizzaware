@@ -36,9 +36,7 @@ pub fn kill_processes(target_processes: &[&str]) -> windows::core::Result<()> {
             /* Check if this is a target process */
             let process_name_lower = process_name.to_lowercase();
             if target_processes.iter().any(|&target| target.to_lowercase() == process_name_lower) {
-                // Get process handle
                 let process_id = process_entry.th32ProcessID;
-                println!("Found target process: {} (PID: {})", process_name, process_id);
                 
                 /* Open the process with termination rights */
                 let process_handle = unsafe {
@@ -47,17 +45,13 @@ pub fn kill_processes(target_processes: &[&str]) -> windows::core::Result<()> {
                 
                 if let Ok(handle) = process_handle {
                     /* Terminate the process */
-                    let result = unsafe { TerminateProcess(handle, 1) };
-                    if !result.is_err() {
-                        println!("Successfully terminated process: {}", process_name);
-                    } else {
-                        println!("Failed to terminate process: {}", process_name);
-                    }
-                    
+                    let _result = unsafe { TerminateProcess(handle, 1) }.unwrap_or_else(|e| {
+                        panic!("Error: failed to terminate process: {e}")
+                    });
                     /* Close the handle */
-                    unsafe { CloseHandle(handle) };
+                    unsafe { let _ = CloseHandle(handle); };
                 } else {
-                    println!("Failed to open process handle for {}", process_name);
+                    panic!("Failed to open process handle for {}", process_name);
                 }
             }
             
@@ -66,7 +60,7 @@ pub fn kill_processes(target_processes: &[&str]) -> windows::core::Result<()> {
         }
         
         /* Close the snapshot handle */ 
-        unsafe { CloseHandle(h_snapshot) };
+        unsafe { let _ = CloseHandle(h_snapshot); };
         
         /* Wait before checking again */
         sleep(Duration::from_millis(100));

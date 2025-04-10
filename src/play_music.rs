@@ -13,8 +13,8 @@ use std::io::Cursor;
 pub fn play_embedded_mp3_with_increasing_speed_volume(iterations: usize, speed_increment: f32, volume_increment: f32) {
     unsafe {
         /* Initializing COM and media foundation */
-        CoInitializeEx(None, COINIT_MULTITHREADED);
-        MFStartup(MF_VERSION, MFSTARTUP_FULL);
+        let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
+        let _ = MFStartup(MF_VERSION, MFSTARTUP_FULL);
 
         /* Load MP3 from PE */
         let mp3_name = PCSTR("ITALIAN_MP3\0".as_ptr() as *const u8);
@@ -37,10 +37,6 @@ pub fn play_embedded_mp3_with_increasing_speed_volume(iterations: usize, speed_i
 
         /* handle mp3 iterations with increasing speed and volume */
         for i in 0..iterations {
-            println!("Playing iteration {}: Speed x{:.2}, Volume x{:.2}", 
-            i + 1, 
-            1.0 + (i as f32 * speed_increment),
-            1.0 + (i as f32 * volume_increment));
 
         let cursor = Cursor::new(original_data.clone());
         let (_stream, stream_handle) = OutputStream::try_default().unwrap_or_else(|e| {

